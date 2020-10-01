@@ -1,8 +1,28 @@
-<div formGroup="form">
-  <input type="file" formControlName="img" />
-  <input
-    type="text"
-    formControlName="url"
-    placeholder="Enter url for your banner"
-  />
+<div>
+  <form class="main-form" [formGroup]="form">
+    <div>
+      <label for="file-upload" class="label-file-upload"> Upload image </label>
+      <input id="file-upload" type="file" accept="image/png, image/jpeg" />
+    </div>
+
+    <div>
+      <div *ngIf="animations" class="animation-select">
+        <select class="somplo-select">
+          <option selected="" [hidden]="true">Select animation</option>
+          <option *ngFor="let animation of animations">
+            {{ animation.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <input
+        class="somplo-input"
+        type="url"
+        formControlName="url"
+        placeholder="Enter url for your banner"
+      />
+    </div>
+    <button>Preview</button>
+  </form>
 </div>

@@ -1,0 +1,32 @@
+// file upload part
+input[type="file"] {
+  display: none;
+}
+
+.label-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.main-form {
+  display: flex;
+  flex-direction: column;
+}
+.somplo-select {
+  height: 32px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+.somplo-select:focus {
+  box-shadow: 0 0 3pt 2pt#ccc;
+}
+.somplo-input {
+  height: 32px;
+  border: 1px solid #ccc;
+  outline: none;
+  padding-left: 5px;
+}
+.somplo-input::placeholder {
+}
