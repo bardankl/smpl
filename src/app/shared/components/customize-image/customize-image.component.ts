@@ -9,52 +9,22 @@ export class CustomizeImageComponent implements OnInit {
   constructor() {}
   @ViewChild('this.c1', { static: true })
   c1: ElementRef<HTMLCanvasElement>;
-
   @ViewChild('this.c2', { static: true })
   c2: ElementRef<HTMLCanvasElement>;
-
+  ctx1: CanvasRenderingContext2D;
+  ctx2: CanvasRenderingContext2D;
+  deltaX: number;
+  deltaY: number;
   ngOnInit(): void {}
   someFunc(): void {
     const proportion = 0.8; // you may change the proportion for the cropped image.
     const theImage =
       'https://s3-us-west-2.amazonaws.com/s.cdpn.io/222579/beagle400.jpg';
-    /*
-original image:
-----------------------------
-|     |                    |
-|     |sy                  |
-|_____|____________        |
-| sx  |           |        |
-|     |           |        |
-|     |           | sh     |
-|     |           |        |
-|     |___________|        |
-|          sw              |
-|                          |
-|                          |
-|__________________________|
-
-cropped image:
-----------------------------
-|     |                    |
-|     |y                   |
-|_____|_________           |
-|  x  |        |           |
-|     |        | h         |
-|     |________|           |
-|          w               |
-|                          |
-|                          |
-|__________________________|
-
-ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
-
-*/
 
     const output = document.getElementById('output');
 
-    const ctx1 = this.c1.nativeElement.getContext('2d');
-    const ctx2 = this.c2.nativeElement.getContext('2d');
+    this.ctx1 = this.c1.nativeElement.getContext('2d');
+    this.ctx2 = this.c2.nativeElement.getContext('2d');
 
     const cw = (this.c1.nativeElement.width = this.c2.nativeElement.width = 400);
     const cx = cw / 2;
@@ -119,9 +89,9 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
     function drawGuides(obj): void {
       // tslint:disable-next-line: forin
       for (const k in obj) {
-        ctx1.fillStyle = o[k].color;
-        ctx1.beginPath();
-        ctx1.fillRect(o[k].x, o[k].y, o[k].w, o[k].h);
+        this.ctx1.fillStyle = o[k].color;
+        this.ctx1.beginPath();
+        this.ctx1.fillRect(o[k].x, o[k].y, o[k].w, o[k].h);
       }
     }
 
@@ -167,7 +137,7 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
     }
 
     function drawCroppedImage(imgo) {
-      ctx2.drawImage(
+      this.ctx2.drawImage(
         img,
         imgo.sx,
         imgo.sy,
@@ -181,18 +151,18 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
     }
 
     function outlineImage(imgo) {
-      ctx2.beginPath();
-      ctx2.rect(imgo.x, imgo.y, imgo.w, imgo.h);
+      this.ctx2.beginPath();
+      this.ctx2.rect(imgo.x, imgo.y, imgo.w, imgo.h);
     }
 
     function cursorStyleC1() {
       this.c1.style.cursor = 'default';
+      // tslint:disable-next-line: forin
       for (const k in o) {
-        //o[k].bool = false;
-        ctx1.beginPath();
-        ctx1.rect(o[k].x - 10, o[k].y - 10, o[k].w + 20, o[k].h + 20);
-        if (ctx1.isPointInPath(mousePos1.x, mousePos1.y)) {
-          if (k == 'sx' || k == 'sw') {
+        this.ctx1.beginPath();
+        this.ctx1.rect(o[k].x - 10, o[k].y - 10, o[k].w + 20, o[k].h + 20);
+        if (this.ctx1.isPointInPath(mousePos1.x, mousePos1.y)) {
+          if (k === 'sx' || k === 'sw') {
             this.c1.style.cursor = 'row-resize';
           } else {
             this.c1.style.cursor = 'col-resize';
@@ -207,7 +177,7 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
     function cursorStyleC2(): void {
       this.c2.nativeElement.style.cursor = 'default';
       outlineImage(imgo);
-      if (ctx2.isPointInPath(mousePos2.x, mousePos2.y)) {
+      if (this.ctx2.isPointInPath(mousePos2.x, mousePos2.y)) {
         this.c2.style.cursor = 'move';
       } else {
         this.c2.style.cursor = 'default';
@@ -235,11 +205,11 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
         mousePos1 = oMousePos(this.c1.nativeElement, evt);
         // tslint:disable-next-line: forin
         for (const k in o) {
-          ctx1.beginPath();
-          ctx1.rect(o[k].x - 10, o[k].y - 10, o[k].w + 20, o[k].h + 20);
-          if (ctx1.isPointInPath(mousePos1.x, mousePos1.y)) {
+          this.ctx1.beginPath();
+          this.ctx1.rect(o[k].x - 10, o[k].y - 10, o[k].w + 20, o[k].h + 20);
+          if (this.ctx1.isPointInPath(mousePos1.x, mousePos1.y)) {
             o[k].bool = true;
-            if (k == 'sx' || k == 'sw') {
+            if (k === 'sx' || k === 'sw') {
               o[k].y = mousePos1.y;
             } else {
               o[k].x = mousePos1.x;
@@ -260,11 +230,11 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
       (evt) => {
         mousePos2 = oMousePos(this.c2.nativeElement, evt);
         outlineImage(imgo);
-        if (ctx2.isPointInPath(mousePos2.x, mousePos2.y)) {
+        if (this.ctx2.isPointInPath(mousePos2.x, mousePos2.y)) {
           isDragging2 = true;
 
-          const deltaX = mousePos2.x - imgo.x;
-          const deltaY = mousePos2.y - imgo.y;
+          this.deltaX = mousePos2.x - imgo.x;
+          this.deltaY = mousePos2.y - imgo.y;
 
           Output(Imgo, output);
         }
@@ -273,18 +243,18 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
     );
 
     // mousemove ***************************
-    this.c1.addEventListener(
+    this.c1.nativeElement.addEventListener(
       'mousemove',
-      function (evt) {
-        mousePos1 = oMousePos(this.c1, evt); //console.log(mousePos)
+      (evt) => {
+        mousePos1 = oMousePos(this.c1.nativeElement, evt); //console.log(mousePos)
         cursorStyleC1();
 
-        if (isDragging1 == true) {
-          ctx1.clearRect(0, 0, cw, ch);
+        if (isDragging1 === true) {
+          this.ctx1.clearRect(0, 0, cw, ch);
 
-          for (k in o) {
+          for (const k in o) {
             if (o[k].bool) {
-              if (k == 'sx' || k == 'sw') {
+              if (k === 'sx' || k === 'sw') {
                 o[k].y = mousePos1.y;
               } else {
                 o[k].x = mousePos1.x;
@@ -294,7 +264,7 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
           }
 
           drawGuides(o);
-          ctx2.clearRect(0, 0, cw, ch);
+          this.ctx2.clearRect(0, 0, cw, ch);
           imgo = Imgo(o, d);
           drawCroppedImage(imgo);
           Output(Imgo, output);
@@ -303,15 +273,15 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
       false
     );
 
-    this.c2.addEventListener(
+    this.c2.nativeElement.addEventListener(
       'mousemove',
-      function (evt) {
-        mousePos2 = oMousePos(this.c2, evt);
+      (evt) => {
+        mousePos2 = oMousePos(this.c2.nativeElement, evt);
 
         if (isDragging2 == true) {
-          ctx2.clearRect(0, 0, cw, ch);
-          d.x = mousePos2.x - deltaX;
-          d.y = mousePos2.y - deltaY;
+          this.ctx2.clearRect(0, 0, cw, ch);
+          d.x = mousePos2.x - this.deltaX;
+          d.y = mousePos2.y - this.deltaY;
           imgo = Imgo(o, d);
           drawCroppedImage(imgo);
           Output(Imgo, output);
@@ -322,47 +292,49 @@ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)
     );
 
     // mouseup ***************************
-    this.c1.addEventListener(
+    this.c1.nativeElement.addEventListener(
       'mouseup',
-      function (evt) {
+      (evt) => {
         isDragging1 = false;
-        for (k in o) {
+        // tslint:disable-next-line: forin
+        for (const k in o) {
           o[k].bool = false;
         }
       },
       false
     );
 
-    this.c2.addEventListener(
+    this.c2.nativeElement.addEventListener(
       'mouseup',
-      function (evt) {
+      (evt) => {
         isDragging2 = false;
       },
       false
     );
 
     // mouseout ***************************
-    this.c1.addEventListener(
+    this.c1.nativeElement.addEventListener(
       'mouseout',
-      function (evt) {
+      (evt) => {
         isDragging1 = false;
-        for (k in o) {
+        // tslint:disable-next-line: forin
+        for (const k in o) {
           o[k].bool = false;
         }
       },
       false
     );
 
-    this.c2.addEventListener(
+    this.c2.nativeElement.addEventListener(
       'mouseout',
-      function (evt) {
+      (evt) => {
         isDragging2 = false;
       },
       false
     );
 
     function oMousePos(canvas: HTMLCanvasElement, evt) {
-      let rect = canvas.getBoundingClientRect();
+      const rect = canvas.getBoundingClientRect();
       return {
         x: Math.round(evt.clientX - rect.left),
         y: Math.round(evt.clientY - rect.top),
