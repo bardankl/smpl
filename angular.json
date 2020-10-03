@@ -12,7 +12,7 @@
       },
       "root": "",
       "sourceRoot": "src",
-      "prefix": "sompo",
+      "prefix": "somplo",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",

@@ -15,6 +15,10 @@ export class FakeBEService {
       id: 2,
       name: 'Slider from right to left',
     },
+    {
+      id: 3,
+      name: 'Without animation',
+    },
   ];
 
   public getAllAnimations(): Observable<Animation[]> {

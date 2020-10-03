@@ -1,8 +1,15 @@
 import { NgModule } from '@angular/core';
-import { CustomizeImageComponent } from './customize-image/customize-image.component';
+
 import { CustomizeImageModule } from './customize-image/customize-image.module';
+import { ConfirmationDialogModule } from './confirmation-dialog/confirmation-dialog.module';
+import { CreativePreviewModule } from './creative-preview/creative-preview.module';
 @NgModule({
   imports: [],
-  exports: [CustomizeImageModule],
+  exports: [
+    CustomizeImageModule,
+    ConfirmationDialogModule,
+    CreativePreviewModule,
+  ],
+  declarations: [],
 })
 export class ComponentsModule {}

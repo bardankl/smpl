@@ -1,28 +1,81 @@
 <div>
-  <form class="main-form" [formGroup]="form">
-    <div>
+  <div [innerHtml]="myStyle"></div>
+  <form class="main-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="d-flex flex-columns">
       <label for="file-upload" class="label-file-upload"> Upload image </label>
-      <input id="file-upload" type="file" accept="image/png, image/jpeg" />
+      <input
+        #loadedImg
+        (change)="fileChangeEvent(loadedImg.files[0])"
+        id="file-upload"
+        type="file"
+        accept="image/png, image/jpeg"
+      />
+      <span
+        class="text-danger"
+        *ngIf="imgControlTouched && formControls.img.errors?.required"
+      >
+        img is required
+      </span>
     </div>
 
     <div>
-      <div *ngIf="animations" class="animation-select">
-        <select class="somplo-select">
-          <option selected="" [hidden]="true">Select animation</option>
+      <div *ngIf="animations" class="d-flex flex-columns animation-select">
+        <select class="somplo-select" formControlName="animationId">
+          <option selected [hidden]="true">Select animation</option>
           <option *ngFor="let animation of animations">
             {{ animation.name }}
           </option>
         </select>
+        <span
+          class="text-danger"
+          *ngIf="
+            formControls.animationId.touched &&
+            formControls.animationId.errors?.required
+          "
+        >
+          Please select animation
+        </span>
       </div>
     </div>
-    <div>
+    <div class="d-flex flex-columns">
       <input
         class="somplo-input"
         type="url"
         formControlName="url"
-        placeholder="Enter url for your banner"
+        placeholder="Enter a link for your creative"
       />
+      <span
+        class="text-danger"
+        *ngIf="formControls.url.touched && formControls.url.errors?.required"
+      >
+        Please, enter a link
+      </span>
+      <span
+        class="text-danger"
+        *ngIf="formControls.url.touched && formControls.url.errors?.validUrl"
+      >
+        Your link should start from http or https
+      </span>
     </div>
-    <button>Preview</button>
+    <button [disabled]="formStatus">Download creative</button>
   </form>
+  <div *ngIf="loadedImgUrl">
+    <a download="hello.html" href="#" #link>Download creative</a>
+
+    <div #test class="slideLeft">
+      <a href="https://google.com" target="blank">
+        <img [src]="loadedImgUrl" />
+      </a>
+    </div>
+  </div>
+
+  <!-- <div >
+    <a href="https://google.com" target="blank">
+      <img
+        [src]="
+          'https://i.insider.com/5b52400e51dfbe20008b45f9?width=750&format=jpeg&auto=webp'
+        "
+      />
+    </a>
+  </div> -->
 </div>
