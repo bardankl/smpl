@@ -26,10 +26,11 @@ export class CreativePreviewComponent
   @ViewChild('img') img: ElementRef;
   @ViewChild('link') link: ElementRef;
   @ViewChild('creativeEl') creativeEl: ElementRef;
+
   public animations = ANIMATIONS;
   public styles: SafeHtml;
   public creativeSub: Subscription;
-  public creative: Creative;
+  public creative: Creative = { img: null, animation: null, url: null };
 
   constructor(
     private creativeService: CreativeDataService,
@@ -38,7 +39,6 @@ export class CreativePreviewComponent
   ) {}
 
   ngOnInit(): void {}
-
   ngAfterContentChecked(): void {
     this.cdr.detectChanges();
     this.creativeSub = this.creativeService
@@ -52,21 +52,13 @@ export class CreativePreviewComponent
     const height = this.creativeEl.nativeElement.naturalHeight;
     this.creativeService.setCreativeDimensions(width, height);
   }
-  // in this case we use arrow function to get variables in global context (as private var in constructor)
-  // or we can avoid it by call this function in tap at 31 string
-  private prepareCreativeToDowload = (creative: Creative): void => {
-    if (creative?.img) {
-      const { w, h } = {
-        ...this.creativeService.getCreativeDimensions(),
-      };
-      if (this.creativeEl && w && h) {
-        const elementStyle = this.creativeEl.nativeElement.style;
-        elementStyle.width = w + 'px';
-        elementStyle.height = h + 'px';
-        elementStyle.backgroundImage = 'url(' + creative.img + ')';
-      }
 
-      this.creative = creative;
+  private prepareCreativeToDowload = (creative: Creative): void => {
+    if (creative?.url) {
+      this.creative.url = creative.url;
+    }
+    if (creative?.img) {
+      this.setCreative(creative);
     }
     if (creative?.animation) {
       const styles = `<style>${ANIMATIONS[creative.animation].code}</style>`;
@@ -84,6 +76,16 @@ export class CreativePreviewComponent
     const element = this.img.nativeElement.outerHTML;
     const blob = new Blob([element], { type: 'text/html' });
     return URL.createObjectURL(blob);
+  }
+  private setCreative(creative: Creative): void {
+    const { w, h } = {
+      ...this.creativeService.getCreativeDimensions(),
+    };
+    const elementStyle = this.creativeEl.nativeElement.style;
+    elementStyle.width = w + 'px';
+    elementStyle.height = h + 'px';
+    elementStyle.backgroundImage = 'url(' + creative.img + ')';
+    this.creative = creative;
   }
   ngOnDestroy(): void {
     if (this.creativeSub) {

@@ -2,7 +2,13 @@
   <form class="main-form" [formGroup]="form">
     <div class="d-flex flex-columns img-wrapper">
       <div class="d-flex">
-        <label for="file-upload" class="label-file-upload">
+        <label
+          for="file-upload"
+          class="label-file-upload"
+          [ngStyle]="{
+            'background-color': formControls.img.valid ? '#6bcc5c' : 'white'
+          }"
+        >
           Upload image
         </label>
         <input
@@ -34,6 +40,11 @@
           class="somplo-select"
           formControlName="animation"
           (change)="onAnimationPick($event)"
+          [ngStyle]="{
+            'background-color': formControls.animation.valid
+              ? '#6bcc5c'
+              : 'white'
+          }"
         >
           <option selected [hidden]="true">Select animation</option>
           <option *ngFor="let animation of animations">
@@ -58,6 +69,9 @@
         formControlName="url"
         placeholder="Enter a link for your creative"
         (change)="onUrlChange($event)"
+        [ngStyle]="{
+          'background-color': formControls.url.valid ? '#6bcc5c' : 'white'
+        }"
       />
       <span
         class="text-danger"
@@ -72,11 +86,20 @@
         Your link should start from http or https
       </span>
     </div>
+    <somplo-utm-tags
+      *ngIf="isTagsAddShown"
+      (closeTag)="onTagsShow()"
+    ></somplo-utm-tags>
+    <span class="tags" *ngIf="!isTagsAddShown" (click)="onTagsShow()"
+      >Would you like to add utm tags to link</span
+    >
+    <span class="text-danger" *ngIf="showTagsError">First enter the link</span>
     <div class="submit-wrapper">
       <somplo-button
         [label]="'Download creative'"
         [disabled]="formStatus"
         (btnClick)="onSubmit()"
+        [showAllow]="!formStatus"
       ></somplo-button>
     </div>
   </form>

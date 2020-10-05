@@ -35,6 +35,8 @@ export class FormComponent implements OnInit, OnDestroy {
   public animationClass = ANIMATIONS;
   public imgControlTouched = false;
   public showCustomize: boolean;
+  public showTagsError = false;
+  public isTagsAddShown = false;
   public loadedImgUrl: string | ArrayBuffer;
   public loadedImg: File;
   private imgName: string;
@@ -102,6 +104,7 @@ export class FormComponent implements OnInit, OnDestroy {
       !this.creativeService.showCustomize().value
     );
     this.showCustomize = this.creativeService.showCustomize().value;
+    this.initForm(this.creativeService.getCreativeData().value);
   }
 
   public onSubmit(): void {
@@ -111,6 +114,14 @@ export class FormComponent implements OnInit, OnDestroy {
     this.link.nativeElement.click();
   }
 
+  public onTagsShow(): void {
+    if (!this.formControls.url.value && !this.isTagsAddShown) {
+      this.showTagsError = true;
+    } else {
+      this.showTagsError = false;
+      this.isTagsAddShown = !this.isTagsAddShown;
+    }
+  }
   private initForm(creative: Creative): void {
     this.form = this.fb.group({
       img: [creative.img, Validators.required],

@@ -1,0 +1,36 @@
+<form [formGroup]="form">
+  <div class="d-flex flex-columns block">
+    <div>Campaign sourse</div>
+    <input
+      type="string"
+      formControlName="source"
+      placeholder="google, instagram, facebook, tik-tok"
+    />
+  </div>
+
+  <div class="d-flex flex-columns block">
+    <div>Traffic type</div>
+    <input
+      formControlName="medium"
+      placeholder="cpc, email, banner, article, video"
+    />
+  </div>
+
+  <div class="d-flex flex-columns block">
+    <div>Campaign name</div>
+    <input
+      formControlName="campaign"
+      placeholder="promo, discount, sale, black friday"
+    />
+  </div>
+
+  <div class="d-flex flex-columns block">
+    <div>Adv id</div>
+    <input formControlName="content" placeholder="link, landing page" />
+  </div>
+  <div class="d-flex flex-columns block">
+    <div>Keyword</div>
+    <input formControlName="term" placeholder="free, -30%, registration" />
+  </div>
+  <span class="tags" (click)="onCloseTags()">Close tags block</span>
+</form>

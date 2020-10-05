@@ -215,14 +215,6 @@ export class CustomizeImageComponent
       'mouseup',
       (evt) => {
         this.isDragging1 = false;
-        // this.autoTrimCanvas(this.c2.nativeElement, this.ctx2); // TODO add button crop image (save) call this method
-        // const imgUrl = this.c2.nativeElement.toDataURL();
-        // const creativeData: Creative = {
-        //   img: imgUrl,
-        //   url: this.creativeService.getCreativeData().value.url,
-        //   animation: this.creativeService.getCreativeData().value.animation,
-        // };
-        // this.creativeService.setCreativeData(creativeData);
         // tslint:disable-next-line: forin
         for (const k in this.cropBars) {
           this.cropBars[k].bool = false;
@@ -233,7 +225,7 @@ export class CustomizeImageComponent
     this.c1.nativeElement.addEventListener(
       'mousemove',
       (evt) => {
-        this.mousePos1 = this.oMousePos(this.c1.nativeElement, evt); // console.log(mousePos)
+        this.mousePos1 = this.oMousePos(this.c1.nativeElement, evt);
         this.cursorStyleC1();
 
         if (this.isDragging1 === true) {

@@ -3,6 +3,9 @@
   [disabled]="disabled"
   (click)="onButtonClick($event)"
   type="button"
+  [ngStyle]="{
+    'background-color': showAllow ? '#6bcc5c' : '#efefef'
+  }"
 >
   {{ label }}
 </button>
