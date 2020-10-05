@@ -1,7 +1,15 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { DomSanitizer, SafeHtml, SafeUrl } from '@angular/platform-browser';
+import {
+  AfterContentChecked,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-import { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { CreativeDataService } from '../../services/UI/creative/creative-data';
@@ -13,28 +21,32 @@ import { ANIMATIONS } from '../../constants/animations/animations';
   templateUrl: './creative-preview.component.html',
   styleUrls: ['./creative-preview.component.scss'],
 })
-export class CreativePreviewComponent implements OnInit {
+export class CreativePreviewComponent
+  implements OnInit, OnDestroy, AfterContentChecked {
   @ViewChild('img') img: ElementRef;
   @ViewChild('link') link: ElementRef;
   @ViewChild('creativeEl') creativeEl: ElementRef;
   public animations = ANIMATIONS;
   public styles: SafeHtml;
-  public creative: Observable<
-    Creative
-  > = this.creativeService.getCreativeData();
+  public creativeSub: Subscription;
+  public creative: Creative;
 
   constructor(
     private creativeService: CreativeDataService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.creative.pipe(tap(this.prepareCreativeToDowload)).subscribe();
-    // .pipe(tap((cr) => this.prepareCreativeToDowload(cr)))
+  ngOnInit(): void {}
+
+  ngAfterContentChecked(): void {
+    this.cdr.detectChanges();
+    this.creativeSub = this.creativeService
+      .getCreativeData()
+      .pipe(tap(this.prepareCreativeToDowload))
+      .subscribe();
   }
-  ngOnChange(event): void {
-    console.log('eve', event);
-  }
+  ngOnChange(event): void {}
   public onLoadCreative(): void {
     const width = this.creativeEl.nativeElement.naturalWidth;
     const height = this.creativeEl.nativeElement.naturalHeight;
@@ -44,12 +56,13 @@ export class CreativePreviewComponent implements OnInit {
   // or we can avoid it by call this function in tap at 31 string
   private prepareCreativeToDowload = (creative: Creative): void => {
     if (creative?.img) {
+      this.creative = creative;
     }
     if (creative?.animation) {
       const styles = `<style>${ANIMATIONS[creative.animation].code}</style>`;
       this.styles = this.sanitizer.bypassSecurityTrustHtml(styles);
     }
-    if (creative?.img && creative.url && creative.animation) {
+    if (creative?.img && creative.url && creative.animation && this.link) {
       this.link.nativeElement.setAttribute('href', creative.url);
       const url = this.createDownloadLink();
       this.creativeService.setCreativeDowloadLink(url);
@@ -61,5 +74,10 @@ export class CreativePreviewComponent implements OnInit {
     const element = this.img.nativeElement.outerHTML;
     const blob = new Blob([element], { type: 'text/html' });
     return URL.createObjectURL(blob);
+  }
+  ngOnDestroy(): void {
+    if (this.creativeSub) {
+      this.creativeSub.unsubscribe();
+    }
   }
 }

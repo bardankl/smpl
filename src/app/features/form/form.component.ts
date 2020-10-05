@@ -21,6 +21,7 @@ import { Animation } from '../../shared/models/api/animation';
 import { ANIMATIONS } from '../../shared/constants/animations/animations';
 import { CreativeDataService } from '../../shared/services/UI/creative/creative-data';
 import { ConfirmationDialogservice } from 'src/app/shared/services/UI/confirmation-dialog/confirmation-dialog.service';
+import { Creative } from '../../shared/models/view/creative/creative';
 @Component({
   selector: 'somplo-form',
   templateUrl: './form.component.html',
@@ -40,21 +41,19 @@ export class FormComponent implements OnInit, OnDestroy {
   imgControlTouched = false;
   showCustomize: boolean;
   private subscription: Subscription;
+  private creativeSubscription: Subscription;
   constructor(
     private fb: FormBuilder,
     private fakeBeService: FakeBEService,
-    private dialogService: ConfirmationDialogservice,
-    private vcr: ViewContainerRef,
     private creativeService: CreativeDataService
-  ) {
-    this.form = this.fb.group({
-      img: ['', Validators.required],
-      animation: [null, Validators.required],
-      url: ['', Validators.required, this.validateUrl],
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
+    this.creativeSubscription = this.creativeService
+      .getCreativeData()
+      .subscribe((creative) => {
+        this.initForm(creative);
+      });
     this.subscription = this.fakeBeService
       .getAllAnimations()
       .subscribe((res) => res && (this.animations = res));
@@ -62,7 +61,10 @@ export class FormComponent implements OnInit, OnDestroy {
   public fileChangeEvent(img: File): void {
     if (img) {
       this.imgControlTouched = true;
-      this.imgName = img.name;
+      const imgName = img.name.includes('.jpg')
+        ? img.name.replace('.jpg', '.html')
+        : img.name.replace('.png', '.html');
+      this.imgName = imgName;
       this.loadedImg = img;
 
       const reader = new FileReader();
@@ -92,16 +94,25 @@ export class FormComponent implements OnInit, OnDestroy {
     return this.form.status === 'INVALID';
   }
 
-  public onshowCrop(): void {
+  public onshowCrop(e): void {
     this.creativeService.setCustomizeShown(
       !this.creativeService.showCustomize().value
     );
     this.showCustomize = this.creativeService.showCustomize().value;
   }
   public onSubmit(): void {
-    this.link.nativeElement.href = this.creativeService.getCreativeDownloadLink();
+    const url = this.creativeService.getCreativeDownloadLink();
+    this.link.nativeElement.href = url;
+    this.link.nativeElement.setAttribute('download', this.imgName);
+    this.link.nativeElement.click();
   }
-
+  private initForm(creative: Creative): void {
+    this.form = this.fb.group({
+      img: [creative.img, Validators.required],
+      animation: [creative.animation, Validators.required],
+      url: [creative.url, Validators.required, this.validateUrl],
+    });
+  }
   private validateUrl(
     control: AbstractControl
   ): Observable<{ [key: string]: boolean }> | Observable<null> {
@@ -113,6 +124,9 @@ export class FormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.creativeSubscription) {
+      this.creativeSubscription.unsubscribe();
     }
   }
 }

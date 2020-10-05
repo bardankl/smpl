@@ -7,7 +7,11 @@ import { CreativeDimensions } from '../../../models/view/creative/dimensions';
   providedIn: 'root',
 })
 export class CreativeDataService {
-  private creativeData: BehaviorSubject<Creative> = new BehaviorSubject(null);
+  private creativeData: BehaviorSubject<Creative> = new BehaviorSubject({
+    img: null,
+    animation: null,
+    url: null,
+  });
   private creativeDowloadLink: string;
   private isCustomizeShown: BehaviorSubject<boolean> = new BehaviorSubject(
     false

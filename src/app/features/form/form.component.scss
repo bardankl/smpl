@@ -4,10 +4,12 @@ input[type="file"] {
 }
 
 .label-file-upload {
+  background-color: white;
   border: 1px solid #ccc;
   display: inline-block;
   padding: 6px 12px;
   cursor: pointer;
+  width: 100%;
 }
 .label-file-upload:hover {
   box-shadow: 0 0 3pt 2pt#ccc;
@@ -15,9 +17,8 @@ input[type="file"] {
 .main-form {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
+
 .somplo-select {
   height: 32px;
   border: 1px solid #ccc;
@@ -26,12 +27,32 @@ input[type="file"] {
 .somplo-select:focus {
   box-shadow: 0 0 3pt 2pt#ccc;
 }
+
 .somplo-input {
   height: 32px;
   border: 1px solid #ccc;
   outline: none;
   padding-left: 5px;
 }
+
 .somplo-input:focus {
   box-shadow: 0 0 3pt 2pt#ccc;
+}
+.form-wrapper {
+  background-color: rgb(219, 211, 211);
+  padding: 20px;
+  border-radius: 4px;
+  margin-top: 20px;
+  width: 250px;
+}
+.animation-wrapper,
+.img-wrapper,
+.url-wrapper {
+  margin-top: 20px;
+}
+.submit-wrapper {
+  margin-top: 10px;
+}
+.customize-wrapper {
+  margin-left: 10px;
 }

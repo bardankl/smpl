@@ -1,6 +1,6 @@
-<div>
-  <form class="main-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="d-flex flex-columns">
+<div class="form-wrapper">
+  <form class="main-form" [formGroup]="form">
+    <div class="d-flex flex-columns img-wrapper">
       <div class="d-flex">
         <label for="file-upload" class="label-file-upload">
           Upload image
@@ -12,9 +12,13 @@
           type="file"
           accept="image/png, image/jpeg"
         />
-        <button (click)="onshowCrop()" *ngIf="formControls.img.value">
-          {{ !showCustomize ? "Customize image" : "Show Preview" }}
-        </button>
+        <div class="customize-wrapper">
+          <somplo-button
+            *ngIf="formControls.img.value"
+            [label]="!showCustomize ? 'Customize image' : 'Show Preview'"
+            (btnClick)="onshowCrop($event)"
+          ></somplo-button>
+        </div>
       </div>
       <span
         class="text-danger"
@@ -24,7 +28,7 @@
       </span>
     </div>
 
-    <div>
+    <div class="animation-wrapper">
       <div *ngIf="animations" class="d-flex flex-columns animation-select">
         <select
           class="somplo-select"
@@ -47,7 +51,7 @@
         </span>
       </div>
     </div>
-    <div class="d-flex flex-columns">
+    <div class="d-flex flex-columns url-wrapper">
       <input
         class="somplo-input"
         type="url"
@@ -68,9 +72,15 @@
         Your link should start from http or https
       </span>
     </div>
-    <button [disabled]="formStatus">Download creative</button>
+    <div class="submit-wrapper">
+      <somplo-button
+        [label]="'Download creative'"
+        [disabled]="formStatus"
+        (btnClick)="onSubmit()"
+      ></somplo-button>
+    </div>
   </form>
   <div *ngIf="loadedImgUrl">
-    <a download="hello.html" href="#" #link>Download creative</a>
+    <a download="" href="#" #link></a>
   </div>
 </div>

@@ -78,7 +78,18 @@ export class CustomizeImageComponent
     this.initHandlers();
   }
 
-  someFunc(): void {}
+  saveAndCrop(): void {
+    this.autoTrimCanvas(this.c2.nativeElement, this.ctx2);
+    const imgUrl = this.c2.nativeElement.toDataURL();
+    const creativeData: Creative = {
+      img: imgUrl,
+      url: this.creativeService.getCreativeData().value.url,
+      animation: this.creativeService.getCreativeData().value.animation,
+    };
+    this.creativeService.setCreativeData(creativeData);
+    const showCustomize = this.creativeService.showCustomize();
+    this.creativeService.setCustomizeShown(!showCustomize);
+  }
   private drawCroppedImage(cropedImgCoordinates: CropedImgCoordinates): void {
     this.ctx2.drawImage(
       this.img,

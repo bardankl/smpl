@@ -1,7 +1,9 @@
 <h1>Preview</h1>
-<div *ngIf="creative | async as creative">
-  <div *ngIf="creative.url">Link: {{ creative.url }}</div>
-  <div>
+<div *ngIf="creative">
+  <div class="link" *ngIf="creative.url">
+    <span>Link:</span> {{ creative.url }}
+  </div>
+  <div class="img">
     <div
       #img
       class="{{

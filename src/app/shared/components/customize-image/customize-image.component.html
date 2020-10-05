@@ -5,6 +5,12 @@
     canvas).<br />Then you may drag to reposition the cropped image (right
     canvas).
   </p>
+  <div>
+    <somplo-button
+      [label]="'Crop and save creative'"
+      (btnClick)="saveAndCrop()"
+    ></somplo-button>
+  </div>
   <canvas #c1 id="c1"></canvas>
   <canvas #c2 id="c2"></canvas>
 </div>
