@@ -44,4 +44,14 @@ export class CreativeDataService {
   public getCreativeDimensions(): CreativeDimensions {
     return this.creativeDimensions;
   }
+  public defineImageDimension(url): void {
+    const Img = new Image();
+    Img.src = url;
+
+    Img.onload = (e: any) => {
+      const height = e.path[0].naturalHeight;
+      const width = e.path[0].naturalWidth;
+      this.setCreativeDimensions(width, height);
+    };
+  }
 }

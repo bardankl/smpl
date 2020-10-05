@@ -4,7 +4,6 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
-  ViewContainerRef,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -12,7 +11,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { SafeHtml } from '@angular/platform-browser';
 
 import { Observable, of, Subscription } from 'rxjs';
 
@@ -20,7 +19,6 @@ import { FakeBEService } from '../../shared/services/API/fake-be.service';
 import { Animation } from '../../shared/models/api/animation';
 import { ANIMATIONS } from '../../shared/constants/animations/animations';
 import { CreativeDataService } from '../../shared/services/UI/creative/creative-data';
-import { ConfirmationDialogservice } from 'src/app/shared/services/UI/confirmation-dialog/confirmation-dialog.service';
 import { Creative } from '../../shared/models/view/creative/creative';
 @Component({
   selector: 'somplo-form',
@@ -35,11 +33,11 @@ export class FormComponent implements OnInit, OnDestroy {
   public form: FormGroup;
   public animations: Animation[];
   public animationClass = ANIMATIONS;
-  loadedImgUrl: string | ArrayBuffer;
-  imgName: string;
-  loadedImg: File;
-  imgControlTouched = false;
-  showCustomize: boolean;
+  public imgControlTouched = false;
+  public showCustomize: boolean;
+  public loadedImgUrl: string | ArrayBuffer;
+  public loadedImg: File;
+  private imgName: string;
   private subscription: Subscription;
   private creativeSubscription: Subscription;
   constructor(
@@ -54,6 +52,7 @@ export class FormComponent implements OnInit, OnDestroy {
       .subscribe((creative) => {
         this.initForm(creative);
       });
+
     this.subscription = this.fakeBeService
       .getAllAnimations()
       .subscribe((res) => res && (this.animations = res));
@@ -61,7 +60,7 @@ export class FormComponent implements OnInit, OnDestroy {
   public fileChangeEvent(img: File): void {
     if (img) {
       this.imgControlTouched = true;
-      const imgName = img.name.includes('.jpg')
+      const imgName = img.name.includes('.jpg') // TODO add enum
         ? img.name.replace('.jpg', '.html')
         : img.name.replace('.png', '.html');
       this.imgName = imgName;
@@ -69,14 +68,16 @@ export class FormComponent implements OnInit, OnDestroy {
 
       const reader = new FileReader();
       reader.readAsDataURL(img);
-
       reader.onload = () => {
         this.loadedImgUrl = reader.result;
+        this.creativeService.defineImageDimension(reader.result);
+
         this.form.controls.img.patchValue(reader.result, { emitEvent: false });
         this.creativeService.setCreativeData(this.form.value);
       };
     }
   }
+
   public onAnimationPick(event): void {
     this.form.controls.animation.patchValue(event.target.value, {
       emitEvent: false,
@@ -87,9 +88,11 @@ export class FormComponent implements OnInit, OnDestroy {
   public onUrlChange(event): void {
     this.creativeService.setCreativeData(this.form.value);
   }
+
   get formControls(): { [key: string]: AbstractControl } {
     return this.form.controls;
   }
+
   get formStatus(): boolean {
     return this.form.status === 'INVALID';
   }
@@ -100,12 +103,14 @@ export class FormComponent implements OnInit, OnDestroy {
     );
     this.showCustomize = this.creativeService.showCustomize().value;
   }
+
   public onSubmit(): void {
     const url = this.creativeService.getCreativeDownloadLink();
     this.link.nativeElement.href = url;
     this.link.nativeElement.setAttribute('download', this.imgName);
     this.link.nativeElement.click();
   }
+
   private initForm(creative: Creative): void {
     this.form = this.fb.group({
       img: [creative.img, Validators.required],
@@ -113,6 +118,7 @@ export class FormComponent implements OnInit, OnDestroy {
       url: [creative.url, Validators.required, this.validateUrl],
     });
   }
+
   private validateUrl(
     control: AbstractControl
   ): Observable<{ [key: string]: boolean }> | Observable<null> {
@@ -121,6 +127,7 @@ export class FormComponent implements OnInit, OnDestroy {
     }
     return of(null);
   }
+
   ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();

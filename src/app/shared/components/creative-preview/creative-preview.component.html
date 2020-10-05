@@ -4,17 +4,15 @@
     <span>Link:</span> {{ creative.url }}
   </div>
   <div class="img">
-    <div
-      #img
-      class="{{
-        creative?.animation ? animations[creative.animation].class : ''
-      }}"
-    >
+    <!-- // TODO refactoring variables -->
+    <div #img>
       <div [innerHtml]="styles"></div>
       <a #link href="" target="blank">
         <img
           #creativeEl
-          src="{{ creative?.img ? creative.img : '' }}"
+          class="{{
+            creative?.animation ? animations[creative.animation].class : ''
+          }}"
           (load)="onLoadCreative()"
         />
       </a>

@@ -86,6 +86,9 @@ export class CustomizeImageComponent
       url: this.creativeService.getCreativeData().value.url,
       animation: this.creativeService.getCreativeData().value.animation,
     };
+
+    this.creativeService.defineImageDimension(imgUrl);
+
     this.creativeService.setCreativeData(creativeData);
     const showCustomize = this.creativeService.showCustomize();
     this.creativeService.setCustomizeShown(!showCustomize);

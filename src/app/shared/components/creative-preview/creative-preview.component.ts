@@ -56,6 +56,16 @@ export class CreativePreviewComponent
   // or we can avoid it by call this function in tap at 31 string
   private prepareCreativeToDowload = (creative: Creative): void => {
     if (creative?.img) {
+      const { w, h } = {
+        ...this.creativeService.getCreativeDimensions(),
+      };
+      if (this.creativeEl && w && h) {
+        const elementStyle = this.creativeEl.nativeElement.style;
+        elementStyle.width = w + 'px';
+        elementStyle.height = h + 'px';
+        elementStyle.backgroundImage = 'url(' + creative.img + ')';
+      }
+
       this.creative = creative;
     }
     if (creative?.animation) {
