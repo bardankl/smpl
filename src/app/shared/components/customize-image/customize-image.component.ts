@@ -39,7 +39,7 @@ export class CustomizeImageComponent
   proportion = 0.8;
   deltaX: number;
   deltaY: number;
-
+  rotateDegry = 90;
   cw: number;
   cx: number;
   ch: number;
@@ -78,7 +78,29 @@ export class CustomizeImageComponent
     this.initHandlers();
   }
 
-  saveAndCrop(): void {
+  // public rotateImage(): void {
+  //   this.ctx1.clearRect(
+  //     0,
+  //     0,
+  //     this.c1.nativeElement.width,
+  //     this.c1.nativeElement.height
+  //   );
+
+  //   this.ctx1.save();
+
+  //   this.ctx1.translate(
+  //     this.c1.nativeElement.width / 2,
+  //     this.c1.nativeElement.height / 2
+  //   );
+
+  //   this.ctx1.rotate((this.rotateDegry * Math.PI) / 180);
+
+  //   this.ctx1.drawImage(this.img, -this.img.width / 2, -this.img.width / 2);
+
+  //   this.ctx1.restore();
+  //   this.rotateDegry += 90;
+  // }
+  public saveAndCrop(): void {
     this.autoTrimCanvas(this.c2.nativeElement, this.ctx2);
     const imgUrl = this.c2.nativeElement.toDataURL();
     const creativeData: Creative = {
