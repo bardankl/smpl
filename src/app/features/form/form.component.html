@@ -1,15 +1,21 @@
 <div>
-  <div [innerHtml]="myStyle"></div>
   <form class="main-form" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="d-flex flex-columns">
-      <label for="file-upload" class="label-file-upload"> Upload image </label>
-      <input
-        #loadedImg
-        (change)="fileChangeEvent(loadedImg.files[0])"
-        id="file-upload"
-        type="file"
-        accept="image/png, image/jpeg"
-      />
+      <div class="d-flex">
+        <label for="file-upload" class="label-file-upload">
+          Upload image
+        </label>
+        <input
+          #loadedImg
+          (change)="fileChangeEvent(loadedImg.files[0])"
+          id="file-upload"
+          type="file"
+          accept="image/png, image/jpeg"
+        />
+        <button (click)="onshowCrop()" *ngIf="formControls.img.value">
+          {{ !showCustomize ? "Customize image" : "Show Preview" }}
+        </button>
+      </div>
       <span
         class="text-danger"
         *ngIf="imgControlTouched && formControls.img.errors?.required"
@@ -20,7 +26,11 @@
 
     <div>
       <div *ngIf="animations" class="d-flex flex-columns animation-select">
-        <select class="somplo-select" formControlName="animationId">
+        <select
+          class="somplo-select"
+          formControlName="animation"
+          (change)="onAnimationPick($event)"
+        >
           <option selected [hidden]="true">Select animation</option>
           <option *ngFor="let animation of animations">
             {{ animation.name }}
@@ -29,8 +39,8 @@
         <span
           class="text-danger"
           *ngIf="
-            formControls.animationId.touched &&
-            formControls.animationId.errors?.required
+            formControls.animation.touched &&
+            formControls.animation.errors?.required
           "
         >
           Please select animation
@@ -43,6 +53,7 @@
         type="url"
         formControlName="url"
         placeholder="Enter a link for your creative"
+        (change)="onUrlChange($event)"
       />
       <span
         class="text-danger"
@@ -61,21 +72,5 @@
   </form>
   <div *ngIf="loadedImgUrl">
     <a download="hello.html" href="#" #link>Download creative</a>
-
-    <div #test class="slideLeft">
-      <a href="https://google.com" target="blank">
-        <img [src]="loadedImgUrl" />
-      </a>
-    </div>
   </div>
-
-  <!-- <div >
-    <a href="https://google.com" target="blank">
-      <img
-        [src]="
-          'https://i.insider.com/5b52400e51dfbe20008b45f9?width=750&format=jpeg&auto=webp'
-        "
-      />
-    </a>
-  </div> -->
 </div>

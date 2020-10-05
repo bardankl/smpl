@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewContainerRef } from '@angular/core';
-import { ConfirmationDialogservice } from '../../shared/services/UI/confirmation-dialog/confirmation-dialog.service';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { CreativeDataService } from '../../shared/services/UI/creative/creative-data';
 
 @Component({
   selector: 'somplo-home-page',
@@ -7,12 +8,10 @@ import { ConfirmationDialogservice } from '../../shared/services/UI/confirmation
   styleUrls: ['./home-page.component.scss'],
 })
 export class HomePageComponent implements OnInit {
-  constructor(
-    private dialogService: ConfirmationDialogservice,
-    private vcr: ViewContainerRef
-  ) {}
+  isCustomizeShown: BehaviorSubject<
+    boolean
+  > = this.creativeService.showCustomize();
 
-  ngOnInit(): void {
-    // this.dialogService.showDialog(this.vcr);
-  }
+  constructor(private creativeService: CreativeDataService) {}
+  ngOnInit(): void {}
 }

@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -9,17 +10,21 @@ import {
 import { CropBars } from '../../models/view/crop/Bars-obj';
 import { CropedImgCoordinates } from '../../models/view/crop/croped-image-coordinates';
 import { Coordinates } from '../../models/view/crop/coordinates';
+import { Subscription } from 'rxjs';
+import { CreativeDataService } from '../../services/UI/creative/creative-data';
+import { CreativeDimensions } from '../../models/view/creative/dimensions';
+import { Creative } from '../../models/view/creative/creative';
 
 @Component({
   selector: 'somplo-customize-image',
   templateUrl: './customize-image.component.html',
   styleUrls: ['./customize-image.component.scss'],
 })
-export class CustomizeImageComponent implements OnInit, AfterViewInit {
-  theImage =
-    'https://s3-us-west-2.amazonaws.com/s.cdpn.io/222579/beagle400.jpg';
+export class CustomizeImageComponent
+  implements OnInit, AfterViewInit, OnDestroy {
+  theImage: string;
   img = new Image();
-
+  subscription: Subscription;
   @ViewChild('c1', { static: true })
   c1: ElementRef<HTMLCanvasElement>;
   @ViewChild('c2', { static: true })
@@ -30,6 +35,7 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
   cropedImageCoordinates: CropedImgCoordinates;
 
   cropBars: CropBars = null;
+  creativeDimensions: CreativeDimensions;
   proportion = 0.8;
   deltaX: number;
   deltaY: number;
@@ -42,7 +48,7 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
   sx = 130;
   sw = 200;
   sh = 200;
-  r = 4;
+  cropBarWidth = 4;
   d: Coordinates;
 
   isDragging1 = false;
@@ -56,9 +62,17 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
     x: 0,
     y: 0,
   };
-  constructor() {}
+  constructor(private creativeService: CreativeDataService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.subscription = this.creativeService
+      .getCreativeData()
+      .subscribe((creative) => {
+        if (creative?.img) {
+          this.theImage = creative.img;
+        }
+      });
+  }
   ngAfterViewInit(): void {
     this.init();
     this.initHandlers();
@@ -86,13 +100,16 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
     };
   }
   private init(): void {
-    this.img.src = this.theImage; // change with img src from parent
+    this.img.src = this.theImage;
+
+    this.creativeDimensions = this.creativeService.getCreativeDimensions();
     this.ctx1 = this.c1.nativeElement.getContext('2d');
     this.ctx2 = this.c2.nativeElement.getContext('2d');
 
-    this.cw = this.c1.nativeElement.width = this.c2.nativeElement.width = 400;
+    this.cw = this.c1.nativeElement.width = this.c2.nativeElement.width = this.creativeDimensions.w;
     this.cx = this.cw / 2;
-    this.ch = this.c1.nativeElement.height = this.c2.nativeElement.height = 400;
+
+    this.ch = this.c1.nativeElement.height = this.c2.nativeElement.height = this.creativeDimensions.h;
     this.cy = this.ch / 2;
 
     this.d = {
@@ -108,14 +125,14 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
         x: 0,
         y: this.sy,
         w: this.cw,
-        h: this.r,
+        h: this.cropBarWidth,
         bool: false,
       },
       sy: {
         color: 'yellow',
         x: this.sx,
         y: 0,
-        w: this.r,
+        w: this.cropBarWidth,
         h: this.ch,
         bool: false,
       },
@@ -124,14 +141,14 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
         x: 0,
         y: this.sy + this.sh,
         w: this.cw,
-        h: this.r,
+        h: this.cropBarWidth,
         bool: false,
       },
       sh: {
         color: 'red',
         x: this.sx + this.sw,
         y: 0,
-        w: this.r,
+        w: this.cropBarWidth,
         h: this.ch,
         bool: false,
       },
@@ -184,6 +201,14 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
       'mouseup',
       (evt) => {
         this.isDragging1 = false;
+        // this.autoTrimCanvas(this.c2.nativeElement, this.ctx2); // TODO add button crop image (save) call this method
+        // const imgUrl = this.c2.nativeElement.toDataURL();
+        // const creativeData: Creative = {
+        //   img: imgUrl,
+        //   url: this.creativeService.getCreativeData().value.url,
+        //   animation: this.creativeService.getCreativeData().value.animation,
+        // };
+        // this.creativeService.setCreativeData(creativeData);
         // tslint:disable-next-line: forin
         for (const k in this.cropBars) {
           this.cropBars[k].bool = false;
@@ -353,6 +378,74 @@ export class CustomizeImageComponent implements OnInit, AfterViewInit {
       this.c2.nativeElement.style.cursor = 'move';
     } else {
       this.c2.nativeElement.style.cursor = 'default';
+    }
+  }
+
+  private autoTrimCanvas(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ): void {
+    const bounds = {
+      left: 0,
+      right: canvas.width,
+      top: 0,
+      bottom: canvas.height,
+    };
+    const rows = [];
+    const cols = [];
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for (let x = 0; x < canvas.width; x++) {
+      cols[x] = cols[x] || false;
+      for (let y = 0; y < canvas.height; y++) {
+        rows[y] = rows[y] || false;
+        const p = y * (canvas.width * 4) + x * 4;
+        const [r, g, b, a] = [
+          imageData.data[p],
+          imageData.data[p + 1],
+          imageData.data[p + 2],
+          imageData.data[p + 3],
+        ];
+        const isEmptyPixel = Math.max(r, g, b, a) === 0;
+        if (!isEmptyPixel) {
+          cols[x] = true;
+          rows[y] = true;
+        }
+      }
+    }
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i]) {
+        bounds.top = i ? i - 1 : i;
+        break;
+      }
+    }
+    for (let i = rows.length; i--; ) {
+      if (rows[i]) {
+        bounds.bottom = i < canvas.height ? i + 1 : i;
+        break;
+      }
+    }
+    for (let i = 0; i < cols.length; i++) {
+      if (cols[i]) {
+        bounds.left = i ? i - 1 : i;
+        break;
+      }
+    }
+    for (let i = cols.length; i--; ) {
+      if (cols[i]) {
+        bounds.right = i < canvas.width ? i + 1 : i;
+        break;
+      }
+    }
+    const newWidth = bounds.right - bounds.left;
+    const newHeight = bounds.bottom - bounds.top;
+    const cut = ctx.getImageData(bounds.left, bounds.top, newWidth, newHeight);
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+    ctx.putImageData(cut, 0, 0);
+  }
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 }

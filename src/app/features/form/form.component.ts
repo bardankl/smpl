@@ -3,8 +3,8 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
-  Renderer2,
   ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -12,14 +12,15 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { Observable, of, Subscription } from 'rxjs';
 
 import { FakeBEService } from '../../shared/services/API/fake-be.service';
 import { Animation } from '../../shared/models/api/animation';
-import { AnimationsTypes } from '../../shared/constants/animations/animation_types';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ANIMATIONS } from '../../shared/constants/animations/animations';
+import { CreativeDataService } from '../../shared/services/UI/creative/creative-data';
+import { ConfirmationDialogservice } from 'src/app/shared/services/UI/confirmation-dialog/confirmation-dialog.service';
 @Component({
   selector: 'somplo-form',
   templateUrl: './form.component.html',
@@ -28,40 +29,35 @@ import { ANIMATIONS } from '../../shared/constants/animations/animations';
 export class FormComponent implements OnInit, OnDestroy {
   @ViewChild('test') test: ElementRef;
   @ViewChild('link') link: ElementRef;
-  @ViewChild('preview') preview: ElementRef;
 
-  myStyle: SafeHtml;
-
-  form: FormGroup;
-  subscription: Subscription;
-  animations: Animation[];
+  public styles: SafeHtml;
+  public form: FormGroup;
+  public animations: Animation[];
+  public animationClass = ANIMATIONS;
   loadedImgUrl: string | ArrayBuffer;
   imgName: string;
   loadedImg: File;
   imgControlTouched = false;
-  pickedAnimationType = AnimationsTypes;
+  showCustomize: boolean;
+  private subscription: Subscription;
   constructor(
     private fb: FormBuilder,
     private fakeBeService: FakeBEService,
-    private el: ElementRef,
-    private renderer: Renderer2,
-    private sanitizer: DomSanitizer
+    private dialogService: ConfirmationDialogservice,
+    private vcr: ViewContainerRef,
+    private creativeService: CreativeDataService
   ) {
     this.form = this.fb.group({
       img: ['', Validators.required],
-      animationId: [null, Validators.required],
+      animation: [null, Validators.required],
       url: ['', Validators.required, this.validateUrl],
     });
   }
-  // TODO add animation to preview
+
   ngOnInit(): void {
     this.subscription = this.fakeBeService
       .getAllAnimations()
       .subscribe((res) => res && (this.animations = res));
-
-    this.myStyle = this.sanitizer.bypassSecurityTrustHtml(
-      ANIMATIONS.SLIDE_LEFT.code
-    );
   }
   public fileChangeEvent(img: File): void {
     if (img) {
@@ -75,19 +71,19 @@ export class FormComponent implements OnInit, OnDestroy {
       reader.onload = () => {
         this.loadedImgUrl = reader.result;
         this.form.controls.img.patchValue(reader.result, { emitEvent: false });
-        this.renderer.addClass(this.preview.nativeElement, 'slideRight');
-        console.log(this.preview);
+        this.creativeService.setCreativeData(this.form.value);
       };
-      setTimeout(() => {
-        const f = this.el.nativeElement.outerHTML;
-        const blob = new Blob([f], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        this.link.nativeElement.href = url;
-      }, 200);
     }
   }
   public onAnimationPick(event): void {
-    console.log(event.target);
+    this.form.controls.animation.patchValue(event.target.value, {
+      emitEvent: false,
+    });
+    this.creativeService.setCreativeData(this.form.value);
+  }
+
+  public onUrlChange(event): void {
+    this.creativeService.setCreativeData(this.form.value);
   }
   get formControls(): { [key: string]: AbstractControl } {
     return this.form.controls;
@@ -95,8 +91,15 @@ export class FormComponent implements OnInit, OnDestroy {
   get formStatus(): boolean {
     return this.form.status === 'INVALID';
   }
+
+  public onshowCrop(): void {
+    this.creativeService.setCustomizeShown(
+      !this.creativeService.showCustomize().value
+    );
+    this.showCustomize = this.creativeService.showCustomize().value;
+  }
   public onSubmit(): void {
-    console.log('SUBmiT');
+    this.link.nativeElement.href = this.creativeService.getCreativeDownloadLink();
   }
 
   private validateUrl(

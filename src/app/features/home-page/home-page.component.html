@@ -2,6 +2,13 @@
   <div class="left-part">
     <somplo-form></somplo-form>
   </div>
-  <div class="right-part"></div>
+  <div class="right-part">
+    <somplo-creative-preview
+      *ngIf="(isCustomizeShown | async) === false"
+    ></somplo-creative-preview>
+    <somplo-customize-image
+      *ngIf="isCustomizeShown | async"
+    ></somplo-customize-image>
+  </div>
 </div>
 <!-- <somplo-customize-image></somplo-customize-image> -->

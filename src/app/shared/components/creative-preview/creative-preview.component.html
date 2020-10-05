@@ -1,5 +1,21 @@
-<div #preview class="slideLeft">
-  <a href="" target="blank">
-    <img [src]="" />
-  </a>
+<h1>Preview</h1>
+<div *ngIf="creative | async as creative">
+  <div *ngIf="creative.url">Link: {{ creative.url }}</div>
+  <div>
+    <div
+      #img
+      class="{{
+        creative?.animation ? animations[creative.animation].class : ''
+      }}"
+    >
+      <div [innerHtml]="styles"></div>
+      <a #link href="" target="blank">
+        <img
+          #creativeEl
+          src="{{ creative?.img ? creative.img : '' }}"
+          (load)="onLoadCreative()"
+        />
+      </a>
+    </div>
+  </div>
 </div>
